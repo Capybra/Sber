@@ -5,7 +5,7 @@ from threading import Thread
 import webview
 
 
-def start_webview():
+def start_webviewt():
     window = webview.create_window('СБЕР кафе', 'http://localhost:8000/', fullscreen=True)
     webview.start()
     window.closed = os._exit(0)
@@ -22,4 +22,4 @@ def start_django():
 
 if __name__ == '__main__':
     Thread(target=start_django).start()
-    #start_webview()
+    start_webviewt()

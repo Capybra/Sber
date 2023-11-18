@@ -3,6 +3,7 @@ import sys
 import time
 from threading import Thread
 import webview
+from desktop_app import start_webviewt
 
 def start_webview():
     window = webview.create_window('Staff', 'http://localhost:8000/staff/login/', fullscreen=True)
@@ -17,5 +18,7 @@ def start_django():
 if __name__ == '__main__':
     Thread(target=start_django).start()
     # Ждем некоторое время для запуска сервера Django
-    time.sleep(5)
+    time.sleep(3)
     start_webview()
+    time.sleep(1)
+    start_webviewt()
