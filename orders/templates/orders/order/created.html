@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<nav class="navbar-dark" style="background-color: #016C3E;">
+    <div class="p-4 pt-5">
+        <div class="container">
+            <div class="row p-4 pt-5">
+                <a class="navbar-brand " href="/">
+                    <img src="{% static 'image/logo.png' %}" width="100" height="100" alt="">
+                    СБЕР КАФЕ
+                </a>
+            </div>
+            <div class="row p-3">
+                <div class="col p-2">
+                    <a href="/" class="btn btn-outline-light btn-block btn-lg">Новый заказ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<div id="content" class="p-4 p-md-5">
+    <div class="album py-5">
+        <div class="container">
+            <div class="row" style="margin-top: 6%">
+                <div class="col-md-8 col-md-offset-2">
+                    <h3 class="page-header">Приятного аппетита, {{ profile.name }}!</h3>
+                    <p>Ваш заказ оформлен. Номер заказа <strong>{{ order.id }}</strong>.</p>
+                    <p>Ваш рейтинг<strong>{{ profile.rating }}</strong>.</p>
+                    {% if qr_image %}
+                    <p>QR код для оплаты:</p>
+                    <img src="/media/qr/{{ order.id }}.png">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
