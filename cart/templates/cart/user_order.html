@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+
+  <div id="content" class="container">
+    <div class="album">
+
+      {% if order is not None %}
+        <span class="badge pull-right">
+          <div class="current-cart-items-title">
+            Заказ №{{order.id}}:
+            <a class="btn btn-info btn-block" id="orderSelection" data-bs-toggle="dropdown" aria-expanded="false" href="{{ order.get_absolute_url }}">
+              <div class="check-title">Заказы</div>
+            </a>
+            <selection class="dropdown-menu" id="orderDropdown" name="orderDropdown">
+              {% for ord in all_orders %}
+                <li><a class="dropdown-item" href="{{ ord.get_absolute_url }}">Заказ №{{ord.id}}</a></li>
+              {% endfor %}
+            </selection>
+          </div>
+        </span>
+        <table class="table table-borderless">
+          <thead>
+            <tr>
+              <th scope="col">Изображение</th>
+              <th scope="col">Товар</th>
+              <th scope="col">Кол-во</th>
+              <th scope="col">Цена одного товара</th>
+              <th scope="col">Сумма</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order_items %}
+              {% with product=item.product %}
+                <tr>
+                  <th scope="row">
+                    <img src="{% if product.image %} {{ product.image.url }} {% else %} {% static 'img/default.jpg' %} {% endif %}"
+                      alt="..." style="height: 130px; width: auto">
+                  </th>
+                  <td>{{ product.name }}</td>
+                  <td> {{ item.quantity }} шт.</td>
+                  <td> {{ item.price }} ₽</td>
+                  <td> {{ item.get_cost }} ₽</td>
+                </tr>
+              {% endwith %}
+            {% endfor %}
+            <tr>
+              <td><b>Суммарная стоимость</b></td>
+              <td colspan="3"></td>
+              <td colspan="num"><b> {{ order.get_total_cost }} ₽</b></td>
+            </tr>
+          </tbody>
+        </table>
+      {% else %}
+        <span class="badge pull-right">
+          <div class="current-cart-items-title">
+            Заказов нет
+        </span>
+      {% endif %}
+    </div>
+    {% if order is not None %}
+      <div class="table-information">
+
+        <div class="display-5" style="margin-bottom: 3%;">
+          Статус заказа: {% if order.ready %} Готов! {% else %} Не готов {% endif %}
+        </div>
+        
+        {% if order.in_cafe %}
+        <div class="display-5">
+          Вы выбрали стол: №{{current_table.number}}
+          Бронь до: {{current_table.ordered_until}}
+
+        </div>
+        {% endif %}
+        <p class="display-5">QR код для оплаты: <img src="/media/qr/{{ order.id }}.png" style="width: 150pt; height: 150pt; margin-left: 15%;"></p>
+
+
+      </div>
+    {% endif %}
+    <div class="row">
+      <div class="col p-2">
+        <a href="{% url 'shop:product_list' %}" class="btn btn-outline-success btn-block btn-lg">Добавить еще</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

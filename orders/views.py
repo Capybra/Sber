@@ -7,6 +7,7 @@ from django.contrib import messages
 from .models import OrderItem, Order
 from cart.cart import Cart
 from users.models import Profile 
+from shop.models import Table
 
 import qrcode, random, string
 
@@ -31,58 +32,46 @@ def pin_create(request):
             response = {'error': 'Пользователь не найден'}
     return JsonResponse(response)
 
+
 def order_create(request):
     cart = Cart(request)
-    qr_image = False
+    profile = Profile.objects.get(email=request.user.email)
     if request.method == 'POST':
-        phone = request.POST['phone']
-        pincode = request.POST['pincode']
-        if len(phone) == 16:
-            phone = phone.replace('+', '').replace('(', '').replace(')', '').replace('-', '').replace('7', '', 1)
-        try:
-            profile = Profile.objects.get(phone=phone)
-            if pincode != profile.pincode:
-                response = {'pincodeerr': 'Не корректный ПИН-Код'}
-                return JsonResponse(response)
-            else:
-                order = Order.objects.create()
-                order.owner = profile
-                order.save()
-                profile.rating += 1
-                profile.pincode = ''
-                profile.save()
-                data = {}
-                for item in cart:
-                    OrderItem.objects.create(
-                        order = order,
-                        product = item['product'],
-                        price = item['price'],
-                        quantity = item['quantity']
-                    )
-                    data['order'] = order
-                    data['product'] = item['product']
-                    data['price'] = item['price']
-                    data['quantity'] = item['quantity']
-                img = qrcode.make(data)
-                img.save("media/qr/" + str(order.id) + ".png")
-                qr_image = True
-                cart.clear()
-                send_mail(
-                    'Заказ Оформлен', 
-                    'Войдите в админ панель, что бы просмотреть новый заказ.' , 
-                    'info@it-cube.krk', 
-                    ['manager@it-cube.krk'], 
-                    fail_silently=False
-                )
-                response = {
-                    'username': profile.name,
-                    'userrating': profile.rating,
-                    'orderid': order.id
-                }
-                return JsonResponse(response)
-        except:
-            response = {'usernameerr': 'Пользователь не найден'}
-            return JsonResponse(response)
-    else:
-        return render(request, 'orders/order/create.html')
+        order = Order.objects.create()
+        if not int(request.POST['chosenTableId']):
+            order.in_cafe = False
+        else:
+            order.in_cafe = True
+            table = Table.objects.get(id=request.POST['chosenTableId'])
+            order.table = table
+            table.available = False
+            table.order_id = order.id
+            table.ordered_until = request.POST['chosenTableTime']
+            table.save()
+        order.profile = profile
+        order.save()
+        profile.rating += 1
+        data = {'order': 0, 'profile': 0}
+        for item in cart:
+            OrderItem.objects.create(
+                order = order,
+                product = item['product'],
+                price = item['price'],
+                quantity = item['quantity']
+            )
+        profile.balance -= order.get_total_cost()
+        profile.save()
+        data['order'] = order
+        data['profile'] = profile
+        img = qrcode.make(data)
+        img.save("media/qr/" + str(order.id) + ".png")
+        cart.clear()
+        send_mail(
+            'Заказ Оформлен', 
+            'Войдите в админ панель, что бы просмотреть новый заказ.' , 
+            'info@it-cube.krk', 
+            ['manager@it-cube.krk'], 
+            fail_silently=False
+        )
+    return redirect('shop:product_list')
 

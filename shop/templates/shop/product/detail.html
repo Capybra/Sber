@@ -1,47 +1,66 @@
-{% extends 'base.html' %}
-{% block content %}
 {% load static %}
-    <nav class="navbar-dark" style="background-color: #016C3E;">
-        <div class="p-4 pt-5">
-            <div class="container">
-                <div class="row p-4 pt-5">
-                    <a class="navbar-brand " href="/">
-                        <img src="{% static 'image/logo.png' %}" width="100" height="100" alt="">
-                        СБЕР КАФЕ
-                    </a>
-                </div>
-                <form action="{% url "cart:cart_add" product.id %}" method="post">
+<div id="{{ product.slug }}--form" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+          <div id="{{ product.slug }}-btn">
+              <div class="row">
+                  
+                  
+                  
+                  
+                  <script>
+                    function increaseValue(inputId) {
+                      var currentValue = parseInt(document.getElementById(inputId).value);
+                      document.getElementById(inputId).value = currentValue + 1;
+                    }
+                
+                    function decreaseValue(inputId) {
+                      var currentValue = parseInt(document.getElementById(inputId).value);
+                      if (currentValue > 1) {
+                        document.getElementById(inputId).value = currentValue - 1;
+                      }
+
+                    }
+                  </script>
+
+                  <img src="{{ product.image.url }}" alt="" style="width: 100%">
+                  <div class="modal-name-of-product-title">{{ product.name }}
+                    {{product.star_rating}}
+                    <img src="{% static 'admin\img\star.svg' %}"/>
+                  </div>
+                  
+                  <h6 style="border: 0px;">Цена</h6>
+                  <div class="modal-price-title">
+                      {{ product.price }} ₽ 
+                  </div>
+                  <div class="modal-description-title">
+                      {{ product.description | safe }}
+                  </div>
+                  <div class="btn-cart-change-value">
+                    <button class="btn btn-success" onclick="decreaseValue('{{ product.slug }}')">-</button>
+                    <button class="btn btn-success" onclick="increaseValue('{{ product.slug }}')">+</button>
+                  </div>
+                  <form action="{% url "cart:cart_add" product.id %}" method="post">
                     {% csrf_token %}
-                    <div class="col p-4">
-                        {{ cart_product_form }}
+                    <div class="btn-cart-change-value-line">
+                      <input type="number" id="{{ product.slug }}" name="quantity" value="1">
                     </div>
                     <div class="col p-2">
-                        <input type="submit" value="Добавить в корзину" class="btn btn-outline-light btn-block btn-lg">
+                        <input type="submit" value="Добавить в корзину" class="btn btn-outline-success btn-block btn-lg">
                     </div>
-                </form>
-                <div class="row p-3">
-                    <div class="col p-2">
-                        <button type="button" value="Previous Page" class="btn btn-outline-warning btn-block btn-lg" onClick="window.history.back();return false;">
-                            Назад
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <div id="content" class="p-4 p-md-5">
-        <div class="album py-5">
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-4">
-                        <img src="{{ product.image.url }}" alt="" style="width: 100%">
-                    </div>
-                    <div class="col-sm-8">
-                        <h1>{{ product.name }}</h1>
-                        <p>{{ product.price }} ₽ | {{ product.description | safe }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                  </form> 
+                  
+                  <div class="row p-3">
+                      <div class="col p-2">
+                          <button type="button" value="Previous Page" class="btn btn-outline-warning btn-block btn-lg" data-bs-dismiss="modal">
+                              Назад
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
     </div>
-{% endblock %}
+  </div>
+</div>

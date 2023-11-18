@@ -1,13 +1,16 @@
 from django.db import models
-from shop.models import Product
+from shop.models import Product, Table
 from users.models import Profile
+from django.urls import reverse
 
 class Order (models.Model):
     id = models.AutoField(primary_key=True)
-    owner = models.ForeignKey(Profile, null=True, blank=True, on_delete=models.CASCADE)
-    paid = models.BooleanField(default=False)  # оплачен ли заказ
+    profile = models.ForeignKey(Profile, related_name='order', null=True, blank=True, on_delete=models.CASCADE)
+    ready = models.BooleanField(default=False)  # готов ли заказ
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    in_cafe = models.BooleanField(default=False)
+    table = models.ForeignKey(Table, related_name='table', null=True, blank=True, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ('-created',)
@@ -18,8 +21,11 @@ class Order (models.Model):
         return 'Заказ {}'.format(self.id)
 
     def get_total_cost(self):
-        # общая сумма заказа
         return sum(item.get_cost() for item in self.items.all())
+    
+    def get_absolute_url(self):
+        return reverse('cart:user_order_special', args=[self.id])
+
 
 class OrderItem(models.Model):
     id = models.AutoField(primary_key=True)
@@ -33,4 +39,5 @@ class OrderItem(models.Model):
 
     def get_cost(self):
         return self.price * self.quantity
+
 
