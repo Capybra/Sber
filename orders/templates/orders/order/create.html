@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!-- Modal -->
+<div class="modal fade" id="orderAuth" tabindex="-1" role="dialog" aria-labelledby="orderAuth" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="orderAuth">Подтверждение заказа</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="typePhone">Телефон</label>
+                    <input type="tel" name="phone" maxlength="16" placeholder="+7(___)___-__-__"  id="phone" class="form-control" onfocus="a = document.querySelector('#phone')">
+                </div>
+                <div class="form-group">
+                    <label for="typeText">ПИН-Код</label>
+                    <div class="input-group">
+                        <input type="text" id="pincode" class="form-control" placeholder="ПИН-Код" onfocus="a = document.querySelector('#pincode')">
+                        <div class="input-group-append" id="pincodebtn">
+                            <button class="btn btn-success" type="button" id="pin_create">Отправить ПИН-Код</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('7', a);">7</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('8', a);">8</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('9', a);">9</button>
+                        </div>
+                    </div>
+                    <div class="row pt-2">
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('4', a);">4</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('5', a);">5</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('6', a);">6</button>
+                        </div>
+                    </div>
+                    <div class="row pt-2">
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('1', a);">1</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('2', a);">2</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('3', a);">3</button>
+                        </div>
+                    </div>
+                    <div class="row pt-2">
+                        <div class="col">
+                            <button type="button" class="btn btn-danger btn-block btn-lg" onclick="inputnum('C', a);">С</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('0', a);">0</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-success btn-block btn-lg" id="enterbtn">B</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<!-- EndModal -->
+
+<nav class="navbar-dark" style="background-color: #016C3E;" id="navbar">
+    <div class="p-4 pt-5">
+        <div class="container">
+            <div class="row p-4 pt-5" id="logodiv">
+                <a class="navbar-brand " href="/">
+                    <img src="{% static 'image/logo.png' %}" width="100" height="100" alt="">
+                    СБЕР КАФЕ
+                </a>
+            </div>
+            <div class="row p-3" id="addbtn">
+                <div class="col p-2">
+                    <a href="{% url "shop:product_list" %}" class="btn btn-outline-light btn-block btn-lg">Добавить еще</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<div id="content" class="p-4 p-md-5">
+    <div class="album py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="page-header">
+                        Заказ
+                    </div>
+                    <ul class="list-group">
+                        {% for item in cart %}
+                            <li class="list-group-item">
+                            {{ item.quantity }}x {{ item.product.name }}
+                            <span> {{ item.total_price }} ₽</span>
+                            </li>
+                        {% endfor %}
+                    <li class="list-group-item active">Общая стоимость: {{ cart.get_total_price }} ₽</li>
+                    </ul>
+                    <div class="pt-5">
+                        <button type="button" class="btn btn-success btn-block btn-lg" data-toggle="modal" data-target="#orderAuth">
+                            Подтвердить заказ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
