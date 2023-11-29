@@ -11,3 +11,4 @@ typed-ast
 wrapt
 qrcode
 pywebview
+transliterate
