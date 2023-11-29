@@ -41,6 +41,36 @@
   box-sizing: border-box;
 }
 
+
+h2.slogan{
+  font-weight: bold;
+}
+
+.select-category{
+  font-size: 5rem;
+} 
+
+.agitation-tittle{
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 1.99rem;
+  margin-left: 2rem;
+
+}
+
+.main-title{
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 1.75rem;
+  margin-left: 1.1rem;
+}
+
+.header{
+  min-height: 70px;
+  margin-bottom: 500px;
+}
+
+
 html {
   font-family: sans-serif;
   line-height: 1.15;
@@ -54,7 +84,7 @@ html {
   width: device-width;
 }
 
-article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
+article, aside, figcaption, figure, footer, hgroup, main, nav, section {
   display: block;
 }
 
@@ -66,8 +96,24 @@ body {
   line-height: 1.5;
   color: #212529;
   text-align: left;
+  font-family: Cambria;
   background-color: #fff;
 }
+
+
+.col{
+  background-color: #002752;
+  border: solid 1px;
+}
+
+
+.block{
+  padding: 20px;
+  text-align: center;
+  height: 100%;
+}
+
+
 
 [tabindex="-1"]:focus {
   outline: 0 !important;
@@ -80,9 +126,14 @@ hr {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  margin-top: 0;
+  margin-top: 5rem;
+  padding-top: 25%;
+  font-weight: 700;
   margin-bottom: 0.5rem;
 }
+
+
+
 
 p {
   margin-top: 0;
@@ -103,6 +154,16 @@ address {
   font-style: normal;
   line-height: inherit;
 }
+
+
+.slogan{
+  font-size: 42px;
+    font-weight: 700;
+    color: #000;
+    line-height: 1;
+    margin: 0 20px 0 0;
+}
+
 
 ol,
 ul,
@@ -549,8 +610,9 @@ pre code {
 
 .container {
   width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  padding-top: 2rem;
   margin-right: auto;
   margin-left: auto;
 }
@@ -585,6 +647,7 @@ pre code {
   padding-left: 15px;
   margin-right: auto;
   margin-left: auto;
+  height: 80%;
 }
 
 .row {
@@ -3989,7 +4052,7 @@ input[type="button"].btn-block {
   padding-top: 0.3125rem;
   padding-bottom: 0.3125rem;
   margin-right: 1rem;
-  font-size: 1.25rem;
+  font-size: 2rem;
   line-height: inherit;
   white-space: nowrap;
 }
@@ -6140,6 +6203,7 @@ a.bg-light:hover, a.bg-light:focus,
 button.bg-light:hover,
 button.bg-light:focus {
   background-color: #dae0e5 !important;
+
 }
 
 .bg-dark {

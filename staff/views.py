@@ -1,63 +1,267 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import check_password
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.urls import reverse
+from django.views import View
+from django.views.generic import DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.hashers import make_password
 from staff.models import Staff
-from django.http import HttpResponseForbidden
+from orders.models import Order
+from shop.models import Product, Table, Cafeteria, ProductStatistics, Category
+from .forms import ProductForm
+from config.views import get_natural_range
+import json
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.hashers import check_password
+from django.contrib import messages
+from django.http import HttpResponseNotFound 
+from django.urls import reverse
+from django.views import View
+from django.views.generic import DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.hashers import make_password
+from staff.models import Staff
+from orders.models import Order
+from shop.models import Product, Table, Cafeteria, Comment
+from shop.models import *
+from .forms import ProductForm, CommentForm
+from shop.forms import CommentForm
+from config.views import get_natural_range
+import json
+from django.http import HttpResponse
+from transliterate import translit
 
 
-
-# Create your views here.
-
-#def login(request):
-    #return render(request, "staff/login/login.html")  
+def check_login(request):
+    user_id = request.user.id
+    staff = get_object_or_404(Staff, user_id=user_id)
+    if staff.logged:
+        return True
+    return False
 
 
 def login(request):
+    user_id = request.user.id
+    staff = get_object_or_404(Staff, user_id=user_id)
+
+    if staff.logged:
+        return redirect(reverse('staff:manage_panel'))
+
+    err = ""
+
     if request.method == 'POST':
-        
-        user_email = request.POST.get('email')
         user_password = request.POST.get('password')
-        
-        print(user_email)
-        print(user_password)
-#проверяем, существует ли пользователь с таким email
-        check_if_user_exists = Staff.objects.filter(email=user_email).exists()
-#если пользователь существует, то продолжаем
-        if check_if_user_exists:
-            try:
-# берём из БД юзера с указанным email
-                staff=Staff.objects.get(email=user_email)             
-# сверяем введённый пароль и хэшированный в БД
-                if check_password(user_password, staff.password):
-                    messages.success(request, 'Email and password are correct')
 
-                    if staff.staff_id == 2:
+        if check_password(user_password, staff.password):
+            staff.logged = True
+            staff.save()
 
-                        return manage_panel(request)  # Перенаправление на страницу управления
-                    elif staff.staff_id == 1:
+            if staff.staff_id == 1 or staff.staff_id == 2:
+                return redirect(reverse('staff:manage_panel'))
+                print('1, 2')
+            elif staff.staff_id == 3:
+                return redirect(reverse('staff:manage_panel3'))
+                print('3')
+            else:
+                err = f"Unknown staff_id: {staff.staff_id}"
 
-                        return admin_panel(request)  # Перенаправление на страницу администратора
-                else:
-                    return render(request, 'staff/login/login_incorrect.html')
-            except Staff.DoesNotExist:
-                messages.error(request, 'Staff ID does not exist')
-# если пользователя не существует в БД
         else:
-            messages.error(request, 'Staff ID does not exist')
+            err = "Неверный пароль"
 
-    return render(request, 'staff/login/login.html')
+    return render(request, 'staff/login.html', {"error": err})
+
+def pending_orders(request):
+    if not check_login(request):
+       return redirect(reverse("staff:login"))
+    orders = Order.objects.filter(ready=False).order_by('reserve_time', 'id')
+    return render(request, 'staff/pending_orders.html', {'orders': orders})
+
+# связь с pending
+def order_is_ready(request, id):
+    order = Order.objects.get(id=id)
+    order.ready = True
+    order.save()
+    return redirect(reverse("staff:pending_orders"))
 
 
+def ready_orders(request):
+    if not check_login(request):
+       return redirect(reverse("staff:login"))
+    orders = Order.objects.filter(ready=True).order_by('reserve_time', 'id')
+    return render(request, 'staff/ready_orders.html', {'orders': orders})
 
 
-def admin_panel(request):
-    if request.method == 'GET':
-        return HttpResponseForbidden()  # возвращаем ошибку 403 
-    return render(request, 'staff/admin_pl.html')
+# связь с ready
+def order_is_applied(request, id):
+    order = Order.objects.get(id=id)
+    order.delete()
+    return redirect(reverse("staff:ready_orders"))
+
+    
+def product(request):
+    if not check_login(request):
+        return redirect(reverse("staff:login"))
+    products = Product.objects.all().order_by('id')
+    return render(request, 'staff/manage_pl.html', {'products': products})
+
+
+def add_product(request):
+    if not check_login(request):
+       return redirect(reverse("staff:login"))
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('staff:login'))
+    else:
+        form = ProductForm()
+    return render(request, 'staff/add_product.html', {'form': form})
+
+
+def edit_product(request, product_id):
+    if not check_login(request):
+       return redirect(reverse("staff:login"))
+    product = get_object_or_404(Product, id=product_id)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('staff:login'))
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'staff/edit_product.html', {'form': form, 'product': product})
+
+
+def table_list(request):
+    if not check_login(request):
+        return redirect(reverse("staff:login"))
+    cafeteria = Cafeteria.objects.get(id=3)
+    if request.method == "POST":
+        cafe_rows, cafe_cols = request.POST.get("cafe_rows"), request.POST.get("cafe_cols")
+        cafeteria.rows = int(cafe_rows)
+        cafeteria.cols = int(cafe_cols)
+        cafeteria.save()
+    tables = Table.objects.filter(cafeteria_id=3)
+    context = {
+        "tables": tables,
+        "cafeteria": cafeteria,
+    }
+    return render(request, 'staff/edit_tables.html', context)
+
+def set_tables(request):
+    if not check_login(request):
+        return redirect(reverse("staff:login"))
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        selected_seats = list(map(int, data['selectedSeats']))
+        action = data.get('action')
+        tables = Table.objects.filter(id__in=selected_seats)
+        if action == "HIDE":
+            for table in tables:
+                table.hidden = True
+                table.save()
+        else:
+            for table in tables:
+                table.hidden = False
+                table.save()
+    return redirect(reverse('staff:table_list'))
+
+
+def statistics(request, category=0, day_time=0):
+    initial = ProductStatistics.objects.all()
+    if category:
+        initial = initial.filter(product__category_id=category)
+    if day_time == 1:
+        statistics = initial.order_by('-morning')
+    elif day_time == 2:
+        statistics = initial.order_by('-afternoon')
+    elif day_time == 3:
+        statistics = initial.order_by('-evening')
+    else:
+        statistics = initial.order_by('-total')
+    day_times = [[i, el] for i, el in enumerate(['Общие', 'Утром', 'Днем', 'Вечером'])]
+    categories = Category.objects.all()
+    context = {'statistics': statistics, 'categories': categories, 'day_times': day_times,
+               'cur_category': category, 'cur_day_time': day_time,}
+    return render(request, 'staff/statistics.html', context)
 
 
 def manage_panel(request):
-    if request.method == 'GET':
-        return HttpResponseForbidden()  # возвращаем ошибку 403 
-    return render(request, 'staff/manage_pl.html')
+    if not check_login(request):
+       return redirect(reverse("staff:login"))
+    return render(request, 'staff/choose_category.html')
+
+def logout_view(request):
+    user_id = request.user.id
+    try:
+        staff = get_object_or_404(Staff, user_id=user_id)
+        staff.logged = False
+        staff.save()
+    except:
+        pass
+    return redirect('shop:product_list')
+
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    success_url = reverse_lazy('login/')  
+ 
+
+class ProductDetailView(View):
+    def get(self, request, id, slug):
+        product = get_object_or_404(Product, id=id, slug=slug)
+
+    def get(self, request, id, slug):
+        product = get_object_or_404(Product, id=id, slug=slug)
+        return render(request, self.template_name, {'product': product})
+
+def delete(request, id):
+    try:
+        product = Product.objects.get(id=id)
+        product.delete()
+        return redirect(reverse('staff:product')) 
+    except Product.DoesNotExist:
+        return HttpResponseNotFound("<h2>Запись не найдена</h2>")
+
+
+def manage_panel3(request):
+    if not check_login(request):
+       return redirect(reverse("staff:login"))
+    return render(request, 'staff/choose_category3.html')
+
+def reviews(request):
+    if not check_login(request):
+       return redirect(reverse("staff:login"))
+    
+    comments = Comment.objects.all()
+
+    # Обработка отправки формы
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            # Сохраняем комментарий в базе данных
+            form.save()
+            # Перенаправляем на страницу обзора комментариев
+            return redirect('staff:reviews')
+    else:
+        # Если это GET-запрос, создаем пустую форму
+        form = CommentForm()
+
+    return render(request, 'staff/reviews_panel.html', {'comments': comments, 'form': form})
+
+def deleter(request, id):
+    try:
+        comment = Comment.objects.get(id=id)
+        comment.delete()
+        return redirect(reverse('staff:reviews')) 
+    except Product.DoesNotExist:
+        return HttpResponseNotFound("<h2>Запись не найдена</h2>")
+
+def deleteus(request, id):
+    try:
+        comment = get_object_or_404(CommentManage, id=id)
+        comment.delete()
+        return redirect(reverse('staff:manage_us')) 
+    except CommentManage.DoesNotExist:
+        return HttpResponseNotFound("<h2>Запись не найдена</h2>")

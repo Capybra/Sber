@@ -1,126 +1,98 @@
-{% extends 'base.html' %}
 {% load static %}
-{% block content %}
 <!-- Modal -->
-<div class="modal fade" id="orderAuth" tabindex="-1" role="dialog" aria-labelledby="orderAuth" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="orderAuth">Подтверждение заказа</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+<div id="orderConfirm" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+          <h5 class="modal-title">Подтверждение заказа</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-        </div>
-        <form>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="typePhone">Телефон</label>
-                    <input type="tel" name="phone" maxlength="16" placeholder="+7(___)___-__-__"  id="phone" class="form-control" onfocus="a = document.querySelector('#phone')">
-                </div>
-                <div class="form-group">
-                    <label for="typeText">ПИН-Код</label>
-                    <div class="input-group">
-                        <input type="text" id="pincode" class="form-control" placeholder="ПИН-Код" onfocus="a = document.querySelector('#pincode')">
-                        <div class="input-group-append" id="pincodebtn">
-                            <button class="btn btn-success" type="button" id="pin_create">Отправить ПИН-Код</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('7', a);">7</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('8', a);">8</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('9', a);">9</button>
-                        </div>
-                    </div>
-                    <div class="row pt-2">
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('4', a);">4</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('5', a);">5</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('6', a);">6</button>
-                        </div>
-                    </div>
-                    <div class="row pt-2">
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('1', a);">1</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('2', a);">2</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('3', a);">3</button>
-                        </div>
-                    </div>
-                    <div class="row pt-2">
-                        <div class="col">
-                            <button type="button" class="btn btn-danger btn-block btn-lg" onclick="inputnum('C', a);">С</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-secondary btn-block btn-lg" onclick="inputnum('0', a);">0</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-success btn-block btn-lg" id="enterbtn">B</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
       </div>
+
+      <script>
+        
+        function toggleActiveState(button) {
+          document.getElementById('occupy-button').classList.add('hidden')
+          // Удаляем класс активности у всех кнопок
+          var buttons = document.getElementsByClassName('btn');
+          for (var i = 0; i < buttons.length; i++) {
+            buttons[i].classList.remove('btn-active');
+            // Добавляем класс неактивности ко всем кнопкам
+            buttons[i].classList.add('btn-inactive');
+          }
+        
+          // Добавляем класс активности только кнопке, которая была нажата
+          button.classList.remove('btn-inactive');
+          button.classList.add('btn-active');
+        }
+
+        function makeTablesVisible() {
+          document.getElementById('occupy-button').hidden=false;
+          document.getElementById('chosenTableNumber').hidden=false;
+          document.getElementById('chosenTableTime').hidden=false;
+          
+        }
+        function makeTablesHidden() {
+          document.getElementById('chosenTableId').value=0;
+          document.getElementById('occupy-button').hidden=true;
+          document.getElementById('chosenTableNumber').hidden=true;
+          document.getElementById('chosenTableTime').hidden=true;
+        }
+      </script>
+      <style>
+        .btn-active {
+        background-color: green;
+        color: white;
+        }   
+      </style>
+      
+
+
+      <div class="page-header">
+        Заказ
+      </div>
+      <li class="list-group-item active"><div class="total-cost"> Общая стоимость: {{ cart.get_total_price }} ₽</div></li>
+      <div class="container-placement">
+        <button type="button" class="btn btn-outline-success btn-block" onclick="toggleActiveState(this);makeTablesVisible()" style="margin-right: 15%;">
+          Забронировать столик
+        </button>
+        <button type="button" class="btn btn-outline-success btn-block" onclick="toggleActiveState(this);makeTablesHidden()">
+          Забрать с собой
+        </button>
+      </div>
+      <form role="form" method="POST" action="{% url "orders:order_create" %}" id="apply-form">
+        {% csrf_token %}
+        <div class="container-placement"> 
+          <button type="button" class="btn btn-outline-info btn-block" data-bs-toggle="modal"
+            data-bs-target="#TableOccupation" id="occupy-button" style="margin-right: 5%; font-size: 14pt;" hidden>
+            <div>Выбрать столик</div>
+          </button>
+          <input class="cool-input" type="number" id="chosenTableId" name="chosenTableId" value="0" hidden>
+          <input class="cool-input" type="number" id="chosenTableNumber" name="chosenTableNumber" placeholder="Номер" hidden readonly>
+          <input class="cool-input" type="time" id="chosenTableTime" name="chosenTableTime" style="margin-left: 5%;" hidden readonly>
+        </div>
+        <div class="col p-2">
+          <button type="submit" class="btn btn-outline-warning btn-block btn-lg">Оформить заказ</button>
+        </div>
+      </form>
+      <button class="btn btn-warning btn-block" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="check-title">Показать чек</div>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        {% if business is None %}
+          {% for item in cart %}
+            <li><div class="dropdown-item" >{{ item.quantity }} x {{ item.product.name }} {{ item.total_price }} ₽</div></li>
+          {% endfor %}
+        {% else %}
+          {% for item in cart %}
+            <li><div class="dropdown-item" >{{ item.name }}</div></li>
+          {% endfor %}
+        {% endif %}
+      </ul>
+                
     </div>
   </div>
-<!-- EndModal -->
-
-<nav class="navbar-dark" style="background-color: #016C3E;" id="navbar">
-    <div class="p-4 pt-5">
-        <div class="container">
-            <div class="row p-4 pt-5" id="logodiv">
-                <a class="navbar-brand " href="/">
-                    <img src="{% static 'image/logo.png' %}" width="100" height="100" alt="">
-                    СБЕР КАФЕ
-                </a>
-            </div>
-            <div class="row p-3" id="addbtn">
-                <div class="col p-2">
-                    <a href="{% url "shop:product_list" %}" class="btn btn-outline-light btn-block btn-lg">Добавить еще</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
-<div id="content" class="p-4 p-md-5">
-    <div class="album py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="page-header">
-                        Заказ
-                    </div>
-                    <ul class="list-group">
-                        {% for item in cart %}
-                            <li class="list-group-item">
-                            {{ item.quantity }}x {{ item.product.name }}
-                            <span> {{ item.total_price }} ₽</span>
-                            </li>
-                        {% endfor %}
-                    <li class="list-group-item active">Общая стоимость: {{ cart.get_total_price }} ₽</li>
-                    </ul>
-                    <div class="pt-5">
-                        <button type="button" class="btn btn-success btn-block btn-lg" data-toggle="modal" data-target="#orderAuth">
-                            Подтвердить заказ
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-{% endblock %}
+
+{% include 'shop\product\table_occupation.html'%}
