@@ -8,7 +8,6 @@ from .models import OrderItem, Order
 from cart.cart import Cart
 from users.models import Profile 
 from shop.models import Table, TableTime, ProductStatistics
-
 import qrcode, random, string
 
 
@@ -36,7 +35,8 @@ def pin_create(request):
 
 def order_create(request):
     cart = Cart(request)
-    profile = Profile.objects.get(email=request.user.email)
+    profile = request.user.profile
+    profile = Profile.objects.get(email=request.user.username)
     if request.method == 'POST':
         order = Order.objects.create()
         time = 0
