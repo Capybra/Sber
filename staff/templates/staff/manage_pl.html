@@ -20,11 +20,13 @@
           <th scope="col">Оценка</th>
           <th scope="col">Изменить</th>
           <th scope="col">Удалить</th>
+          </th><a href="{% url 'staff:add_product' %}">Добавить новый продукт</a></tr>
           
         </tr>
       </thead>
       <tbody>
         {% for product in products %}
+        
         <tr>
           <td>{{ product.id }}</td>
           <td>{{ product.name }}</td>
@@ -38,7 +40,7 @@
           <td>{{ product.clpc }}</td>
           <td>{{ product.star_rating }}</td>
           <td><a href="{% url 'staff:edit_product' product.id %}">Изменить</a></td>
-          <td><a href="{% url 'staff:product_delete' pk=product.id %}">Удалить</a></td>
+          <td><a href="{% url 'staff:product_delete' id=product.id %}">Удалить</a></td>
         </tr>
         {% endfor %}
       </tbody>

@@ -3,55 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Product</title>
-    <style>
-        body {
-          font-family: Arial, sans-serif;
-          background-color: #f2f2f2;
-        }
-        h1 {
-          text-align: center;
-          margin-top: 50px;
-        }
-        form {
-          text-align: center;
-          margin: 50px auto;
-          width: 300px;
-        }
-        label {
-          display: block;
-          margin-top: 10px;
-        }
-        input[type="email"],
-        input[type="password"] {
-          width: 100%;
-          padding: 10px;
-          margin-top: 5px;
-          border-radius: 5px;
-          border: 1px solid #ccc;
-          box-sizing: border-box;
-        }
-        input[type="submit"] {
-          width: 100%;
-          padding: 10px;
-          margin-top: 10px;
-          border-radius: 5px;
-          background-color: #4CAF50;
-          color: white;
-          border: none;
-          cursor: pointer;
-        }
-        input[type="submit"]:hover {
-          background-color: #45a049;
-        }
-      </style>
+    <title>Редактировать Продукт</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h2>Edit Product</h2>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+      
     <form method="post">
+        <h2>Редактировать Продукт</h2>
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Save changes</button>
+        <button type="submit">Сохранить Изменения</button>
     </form>
 </body>
 </html>
