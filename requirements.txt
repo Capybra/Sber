@@ -1,5 +1,5 @@
 astroid
-Django
+Django==5.0.10
 isort
 lazy-object-proxy
 mccabe
